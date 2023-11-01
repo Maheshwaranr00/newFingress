@@ -4,8 +4,7 @@ import {test,expect,Browser,BrowserContext,Page,chromium, Locator} from "@playwr
 let browser : Browser;
 let context : BrowserContext;
 let page : Page;
-
-
+let chartContent : string[];
 let tabName : string[];
 let tabs :Locator[],tabHeader:string|null,chartHeader:string|null;
 let filterOptions : Locator[];
@@ -105,4 +104,107 @@ test('Verifying the filers can be hidden and visible',async()=>{
             await expect(filterOptions[i]).toBeVisible();
         })        
     }
+})
+test('Verifying that the chart is changed based on the date selection',async()=>{
+    await test.step('Clicking the 2023 year and fetching the chart contents',async()=>{
+        await page.locator('text="2023"').click();
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+        chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+    console.log(chartContent);}
+    catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Clicking the June month and fetching the chart contents',async()=>{
+        await page.locator('text="June"').click();
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+            console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Clicking the 24th date and fetching the chart contents',async()=>{
+        await page.locator('text=" 24 "').nth(0).click();
+        await page.locator('[class="ngx-charts"]').nth(0).waitFor({state:"visible"});
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await page.locator('text="2023"').click();
+    await page.locator('text="June"').click();
+    await page.locator('text=" 24 "').nth(0).click();
+})
+test('Verifying that the selecting Quarterly option can change the chart content ',async()=>{
+    await test.step('Select the year 24',async()=>{
+        await page.locator('text="2024"').click();        
+    })
+    for(let i=1;i<5;i++){
+        await test.step('Clicking the Quarterly option and fetching the chart content',async()=>{
+            await page.locator(`text='Q${i}'`).click();            
+        })        
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+            console.log(await page.locator('text="No data Found"').textContent());}
+        await test.step('Unchecking the Quarterly option',async()=>{
+            await page.locator(`text='Q${i}'`).click();
+        })
+    }
+    await page.locator('text="2024"').click();
+})
+test('Verifying that the selecting Month option can change the chart content ',async()=>{
+    await test.step('Select the year 23',async()=>{
+        await page.locator('text="2023"').click();        
+    })
+    const months= ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"];
+    for(let i=0;i<months.length;i++){
+        await test.step('Clicking the Month option and fetching the chart content',async()=>{
+            await page.locator(`text='${months[i]}'`).click();            
+        })        
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+            console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+            console.log(await page.locator('text="No data Found"').textContent());}
+            await test.step('Unchecking the selected monthly option',async()=>{
+            await page.locator(`text='${months[i]}'`).click();
+        })
+    }await page.locator('text="2023"').click();
+})
+test('Verifying that multiple options can be selected in filter option',async()=>{
+    await test.step('Selecting two years in filters option',async()=>{
+        await page.locator('text="2023"').click();
+        await page.locator('text="2024"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Selecting two months in filters option',async()=>{
+        await page.locator('text="June"').click();
+        await page.locator('text="Aug"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+            chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Selecting two dates in filters option',async()=>{
+        await page.locator('text="June"').click();
+        await page.locator('text="Aug"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[class="ngx-charts"]')).toBeVisible();
+        chartContent = await page.locator('[class="ngx-charts"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
 })

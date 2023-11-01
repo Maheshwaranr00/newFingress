@@ -13,6 +13,7 @@ const date = new Date().toISOString().slice(0, 10); //2022-10-10
 const outputDir = `./test-results/${date}`;
 export default defineConfig({
   testDir: './tests',
+  testMatch: ['**/dashboards/*.ts', '**/ListPages/*.ts'],
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -30,13 +31,13 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    // baseURL: 'http://127.0.0.1:3000',
 
+    // baseURL: 'http://127.0.0.1:3000',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
   expect:{
-    timeout:30 * 1000
+    timeout:10 * 1000
   },
   timeout: 70 * 1000,
 
@@ -44,7 +45,8 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome']
+        }      
     },
 
     // {

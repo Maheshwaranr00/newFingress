@@ -5,8 +5,8 @@ let browser : Browser;
 let context : BrowserContext;
 let page : Page;
 
-
 let checkBoxes : Locator[];
+let chartContent : string[];
 let radio_buttons : Locator[];
 let tabs :Locator[],tabHeader:string|null,chartHeader:string|null;
 let tabName : string[];
@@ -16,10 +16,9 @@ let filterOptions : Locator[];
 let baseUrl = "http://192.168.1.49:8086/";
 
 test.beforeAll(async()=>{
-     browser = await chromium.launch({headless:false,downloadsPath:`tests/dashboards/newfile.png`});
+     browser = await chromium.launch({headless:false,downloadsPath:`tests/dashboards/newfile`});
      context = await browser.newContext();
-     page = await context.newPage();
-     
+     page = await context.newPage();     
      await page.goto(baseUrl);
      await page.locator("//mat-icon[text()='view_comfy']").click();
      await page.locator("//span[text()='Fingress Explorer']").click();
@@ -37,7 +36,7 @@ test('Verifying all the checkboxes can be checked and unchecked',async()=>{
         console.log(checkBoxes.length);
     })       
     for(let i=0;i<checkBoxes.length;i++){
-        await test.step('clicking and validating the the checkboxes one by one',async()=>{
+        await test.step('clicking and validating the checkboxes one by one',async()=>{
             await checkBoxes[i].click();
             await expect(checkBoxes[i]).toBeChecked();
         })
@@ -87,11 +86,12 @@ test('Verifying the tab names and chart names should be related ',async()=>{
     }
 })
 test('Verifying the view chart, close chart and chart type (Vertical/Horizontal) in all tabs ',async()=>{
-    await page.locator('[class*="pagination-before"]').click();
-    await page.locator('[class*="pagination-before"]').click();
+    // await page.locator('[class*="pagination-before"]').click();
+    // await page.locator('[class*="pagination-before"]').click();
     await test.step('waiting and fetching the locators of tab headers',async()=>{
         await page.locator('[class="mat-tab-label-content"]').nth(0).waitFor({state:"visible"});
         tabs = await page.locator('[class="mat-tab-label-content"]').all();
+        console.log(tabs.length);
     })
     await test.step('fetching the tab names',async()=>{
         tabName = await page.locator('[class="mat-tab-label-content"]').allTextContents();
@@ -107,6 +107,7 @@ test('Verifying the view chart, close chart and chart type (Vertical/Horizontal)
                 await page.locator('svg[width]').nth(1).waitFor({state:"visible"});
                 await expect(page.locator('text="Download"')).toBeVisible();
             })            
+            if(i==3){await page.pause();}
             await test.step('downloading the chart',async()=>{
                 await page.locator('text="Download"').click();                                
             })            
@@ -126,7 +127,7 @@ test('Verifying the view chart, close chart and chart type (Vertical/Horizontal)
         if(i==tabs.length-1){await page.pause();}
     }
 })
-test('Verifying the filers can be hidden and visible',async()=>{
+test('Verifying the filters can be hidden and visible',async()=>{
     await test.step('Waiting for the visibility of filters and getting locators for the filters type',async()=>{
         await page.locator('[class*="border-bottom"]').nth(0).waitFor({state:"visible"});
         filterOptions = await page.locator('[class*="border-bottom"]').all();
@@ -150,4 +151,103 @@ test('Verifying the filers can be hidden and visible',async()=>{
             await expect(filterOptions[i]).toBeVisible();
         })        
     }
+})
+test('Verifying that the chart is changed based on the date selection',async()=>{
+    await test.step('Clicking the 2023 year and fetching the chart contents',async()=>{
+        await page.locator('text="2023"').click();
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+        chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+    console.log(chartContent);}
+    catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+    console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Clicking the June month and fetching the chart contents',async()=>{
+        await page.locator('text="June"').click();
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Clicking the 6th date and fetching the chart contents',async()=>{
+        await page.locator('text=" 24 "').nth(0).click();
+        await page.locator('[stroke-width="0.01"]').nth(0).waitFor({state:"visible"});
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+})
+test('Verifying that the selecting Quarterly option can change the chart content ',async()=>{
+    await test.step('Select the year 24',async()=>{
+        await page.locator('text="2024"').click();        
+    })
+    for(let i=1;i<5;i++){
+        await test.step('Clicking the Quarterly option and fetching the chart content',async()=>{
+            await page.locator(`text='Q${i}'`).click();            
+        })        
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+        await test.step('Unchecking the Quarterly option',async()=>{
+            await page.locator(`text='Q${i}'`).click();
+        })
+    }
+})
+test('Verifying that the selecting Month option can change the chart content ',async()=>{
+    await test.step('Select the year 23',async()=>{
+        await page.locator('text="2023"').click();        
+    })
+    const months= ["Jan","Feb","Mar","Apr","May","June","July","Aug","Sept","Oct","Nov","Dec"];
+    for(let i=0;i<months.length;i++){
+        await test.step('Clicking the Month option and fetching the chart content',async()=>{
+            await page.locator(`text='${months[i]}'`).click();            
+        })        
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+        await test.step('Unchecking the selected monthly option',async()=>{
+            await page.locator(`text='${months[i]}'`).click();
+        })
+    }
+})
+test('Verifying that multiple options can be selected in filter option',async()=>{
+    await test.step('Selecting two years in filters option',async()=>{
+        await page.locator('text="2023"').click();
+        await page.locator('text="2024"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Selecting two months in filters option',async()=>{
+        await page.locator('text="June"').click();
+        await page.locator('text="Aug"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
+    await test.step('Selecting two dates in filters option',async()=>{
+        await page.locator('text="June"').click();
+        await page.locator('text="Aug"').click();          
+    })
+    await test.step('fetching the chart content',async()=>{        
+        try{await expect(page.locator('[stroke-width="0.01"]').nth(0)).toBeVisible();
+            chartContent = await page.locator('[stroke-width="0.01"]').allTextContents();
+        console.log(chartContent);}
+        catch(Error){await expect(page.locator('text="No data Found"')).toBeVisible();
+        console.log(await page.locator('text="No data Found"').textContent());}
+    })
 })

@@ -102,13 +102,15 @@ test('Calendar View - Validating previous month and next month navigations',asyn
     })
     await test.step('Navigating to the desired month and reading the calender title',async()=>{
         while(cal1!='January 2023'){await page.locator('button[title="Previous month"]').click();
-        cal1 = await page.locator("h2").textContent();}    
-    })    
-    console.log(cal1);     
+        cal1 = await page.locator("h2").textContent();
+        console.log(cal1);}    
+    })             
     //UI comparison    
     { waitUntil: 'networkidle' }
     //await expect(page).toHaveScreenshot('image.png',{fullPage: true});    
-    await test.step('Hitting the Next month option',async()=>{
-        await page.locator('button[title="Next month"]').click();
+    await test.step('Hitting the Next month option until navigating to the current month',async()=>{
+        while(cal1!='October 2023'){await page.locator('button[title="Next month"]').click();
+        cal1 = await page.locator("h2").textContent();
+        console.log(cal1);}        
     })              
 })

@@ -7,7 +7,7 @@ let page : Page;
 
 let minimize: Locator[],countOfMinimize:any;
 let maximize: Locator[],countOfMaximize: any;
-let count: string | null,no1: Number;
+let count: string | null,no1: Number,noOfcount: string | null;
 let kanbanOptions: Locator[];
 let baseUrl = "http://192.168.1.49:8086/";
 
@@ -29,8 +29,8 @@ test.afterEach(async()=>{
     await page.close();
     await browser.close();
 })
-//23469,23472,23473,
-test('Verify that the tabular view shows up pagination based on the page size configured',async()=>{
+//23472: Verify that the number of records per page depends on the page size configured,23473,
+test('23469: Verify that the tabular view shows up pagination based on the page size configured',async()=>{
     for(let i=0; i<4; i++){        
         await test.step('clicking the item per page',async()=>{
             await page.locator("div[class*='mat-select-arrow']").first().click();
@@ -56,8 +56,33 @@ test('Verify that the tabular view shows up pagination based on the page size co
             })                   
     }        
 })
-test('',async()=>{
-    
+test('23475,23476: Verify that the user can navigate to the previous page and next page',async()=>{
+    await test.step('clicking the item per page',async()=>{
+        await page.locator("div[class*='mat-select-arrow']").first().click();
+    })
+    await test.step('selecting count and fetching the count as text',async()=>{
+        count =await page.locator("span[class='mat-option-text']").nth(0).textContent();
+        await page.locator("span[class='mat-option-text']").nth(0).click();
+    })
+    for(let i=0;i<5;i++){
+        await test.step('navigating to the next page',async()=>{
+            await page.locator('button[class*="mat-paginator-navigation-next"]').waitFor({state:"visible"});
+            await page.locator('button[class*="mat-paginator-navigation-next"]').click();
+            noOfcount = await page.locator('div[class="mat-paginator-range-label"]').textContent();    
+            console.log(noOfcount); 
+        })
+    }
+    for(let i=0;i<5;i++){
+        await test.step('navigating to the previous page',async()=>{
+            await page.locator('button[class*="mat-paginator-navigation-previous"]').waitFor({state:"visible"});
+            await page.locator('button[class*="mat-paginator-navigation-previous"]').click();
+            noOfcount = await page.locator('div[class="mat-paginator-range-label"]').textContent();    
+            console.log(noOfcount); 
+        })
+    }
+})
+test('23480: Verify that the total number of record count shows up in the pagination section',async()=>{
+    await expect(page.locator('div[class="mat-paginator-range-label"]')).toBeVisible();    
 })
 
 

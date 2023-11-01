@@ -189,7 +189,40 @@ test('Validating the monthly invoice count should be equal to the addition of in
         })       
     }
 })
+test('23481: Verify that the the records can be sorted based on the sortable fields configured',async()=>{
+    selectors.setTestIdAttribute('class');
+    await test.step('waiting for visibility of months and getting all months text',async()=>{
+        await page.getByTestId('pr-1').nth(0).waitFor({state:"visible"});
+        const months = await page.getByTestId('pr-1').allTextContents();
+        console.log(months);
+    })
+    await test.step('clicking on the ascending order',async()=>{
+        await page.locator("text=' Ascending '").click();
+    })
+    await test.step('after switching the sorting fetching the months as text',async()=>{
+        const AscMonths = await page.getByTestId('pr-1').allTextContents();
+        console.log(AscMonths);
+    })  
+})
+test('23492: Verify that the any date field filter enablement shows up min and max range',async()=>{
+    selectors.setTestIdAttribute('class');
+    await test.step('waiting for visibility of months and getting first month text',async()=>{
+        await page.getByTestId('pr-1').nth(0).waitFor({state:"visible"});
+        const months = await page.getByTestId('pr-1').nth(0).textContent();
+        console.log(months);
+    })
+    await test.step('clicking on the descending order',async()=>{
+        await page.locator("text='Descending '").click();
+    })
+    await test.step('after switching the sorting fetching the first month as text',async()=>{
+        const AscMonths = await page.getByTestId('pr-1').nth(0).textContent();
+        console.log(AscMonths);
+    })  
+})
 test('Verifying that list view can be changed as card view and vice versa ',async()=>{
+    await test.step('Clicking the first month',async()=>{
+        await page.getByTestId('timeline-month ng-star-inserted').nth(0).click();
+    })
     await test.step('waiting for visibility of eye view and fetching all locators of eye view option',async()=>{
         await page.getByTestId('fa fa-eye pl-2 ng-star-inserted').nth(0).waitFor({state:"visible"});
         await page.getByTestId("fa fa-eye pl-2 ng-star-inserted").nth(0).click();
@@ -210,6 +243,7 @@ test('Verifying that list view can be changed as card view and vice versa ',asyn
         await expect(page.locator('[class*="card-columns"]')).toBeVisible();
     })
 })
+
 
 
 
