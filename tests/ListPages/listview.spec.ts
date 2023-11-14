@@ -19,17 +19,14 @@ function setTestIds(test: any, ids: string[]) {
             description: id
         };
     });
-
     annotations.forEach(el => {
         test.info().annotations.push(el);
     });
 }
 let i=0;
-test.describe('suite', async () => { 
-    
+test.describe('suite', async () => {     
 test.beforeEach(async()=>{    
-    const id = ['23456', '23457', '23458', '23459']    
-    
+    const id = ['23456', '23457', '23458', '23459'];    
     setTestIds(test, [`${id[i]}`]);
     i++;
     browser = await chromium.launch({headless:false});
@@ -43,7 +40,7 @@ test.beforeEach(async()=>{
         await page.locator('(//span[text()="List View"])[1]').waitFor({state:"visible" });
         await page.locator('(//span[text()="List View"])[1]').click();
     })
-    console.log(test.info());
+    
 })
 test.afterEach(async()=>{
     await page.close();

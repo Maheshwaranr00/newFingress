@@ -9,11 +9,12 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
-const date = new Date().toISOString().slice(0, 10); //2022-10-10
-const outputDir = `./test-results/${date}`;
+const date = new Date().toISOString().slice(0,19); 
+const date1 = date.split(":");//2022-10-10
+const outputDir = `./test-results/${date1}`;
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['**/dashboards/*.ts', '**/ListPages/*.ts'],
+ 
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -25,7 +26,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   outputDir: outputDir,
   reporter:[ ['html'],['monocart-reporter',{  
-    name: `My Test Report ${date}`,
+    name: `My Test Report ${date1}`,
     outputFile: `${outputDir}/index.html`
 }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
@@ -48,6 +49,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome']
         }      
     },
+    
 
     // {
     //   name: 'firefox',

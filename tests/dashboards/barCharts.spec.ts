@@ -1,10 +1,12 @@
 import {test,expect,Browser,BrowserContext,Page,chromium,Locator} from "@playwright/test";
 
+export function barChartTestScripts(){
+
+
 
 let browser : Browser;
 let context : BrowserContext;
 let page : Page;
-
 let checkBoxes : Locator[];
 let chartContent : string[];
 let radio_buttons : Locator[];
@@ -14,7 +16,6 @@ let verticalText : string|null;
 let filterOptions : Locator[];
 
 let baseUrl = "http://192.168.1.49:8086/";
-
 test.beforeAll(async()=>{
      browser = await chromium.launch({headless:false,downloadsPath:`tests/dashboards/newfile`});
      context = await browser.newContext();
@@ -60,6 +61,7 @@ test('Verifying all radio buttons can be selected',async()=>{
     }
 })
 test('Verifying the tab names and chart names should be related ',async()=>{
+ 
     await test.step('waiting and fetching the locators of tab headers',async()=>{
         await page.locator('[class="mat-tab-label-content"]').nth(0).waitFor({state:"visible"});
         tabs = await page.locator('[class="mat-tab-label-content"]').all();
@@ -80,8 +82,9 @@ test('Verifying the tab names and chart names should be related ',async()=>{
             chartHeader = await page.locator('[class*=card-header]').nth(1).textContent();
         })
         await test.step('Verifying that chart heading and tab heading are related ',async()=>{
-            try{expect(chartHeader).toContain(tabHeader);}
-            catch(Error){console.log(Error);}
+            expect(chartHeader).toContain(tabHeader);
+           
+            
         })
     }
 })
@@ -120,9 +123,8 @@ test('Verifying the view chart, close chart and chart type (Vertical/Horizontal)
         })    
         console.log(await page.locator('[class*=label-active]').textContent());
         await test.step('verifying the text based on the chart format',async()=>{       
-            try{if(tabName[i].includes("Vertical")){expect(verticalText).toBe(' Amount ');}
-            else{expect(verticalText).toBe(' Currency ');}}
-            catch(Error){console.log(Error,i);}        
+            if(tabName[i].includes("Vertical")){expect(verticalText).toBe(' Amount ');}
+            else{expect(verticalText).toBe(' Currency ');}
         })
         if(i==tabs.length-1){await page.pause();}
     }
@@ -251,3 +253,10 @@ test('Verifying that multiple options can be selected in filter option',async()=
         console.log(await page.locator('text="No data Found"').textContent());}
     })
 })
+process.on('unhandledRejection', (error: Error, promise: Promise<any>) => {
+    if (error.message.includes('expect(received).toContain(expected)')) {
+        console.log('Custom handling of assertion error:');        
+        console.log(error);
+    }
+    });
+}

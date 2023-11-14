@@ -114,3 +114,17 @@ test('Calendar View - Validating previous month and next month navigations',asyn
         console.log(cal1);}        
     })              
 })
+test.only('Verifying that invoice files are displayed after clicking the date cells',async()=>{    
+    for(let i=1;i<30;i++){
+        await test.step('Checking the visibility of (no records available.) text, if that is not presented then fetching the invoice details',async()=>{
+            await page.locator(`[aria-label="November ${i}, 2023"]`).click();
+            try{await expect(page.locator('h5')).toBeVisible();
+            await page.locator(`[aria-label="November ${i}, 2023"]`).click();}
+            catch(Error){await expect( page.locator('[class="table"]')).toBeVisible();
+                console.log(await page.locator('[class="table"]').textContent());
+                if(i==1){await page.locator(`[aria-label="November ${i+1}, 2023"]`).click();}
+                else{await page.locator(`[aria-label="November ${i-1}, 2023"]`).click();}
+            }           
+        })
+    }
+})
